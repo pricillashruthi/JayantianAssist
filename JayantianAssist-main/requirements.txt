@@ -1,0 +1,6 @@
+Flask>=3.0
+# optional: grounded LLM answers (set ANTHROPIC_API_KEY)
+# anthropic
+# optional: refresh knowledge base from the website
+# requests
+# beautifulsoup4

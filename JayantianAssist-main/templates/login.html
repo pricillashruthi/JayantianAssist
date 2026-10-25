@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+{% block title %}Log in · JayantianAssist{% endblock %}
+{% block bodyclass %}auth{% endblock %}
+{% block body %}
+<main class="card">
+  <div class="card-header">
+    <div class="brand">JayantianAssist</div>
+    <button type="button" class="theme-toggle" id="theme-btn" title="Toggle theme" aria-label="Toggle theme">🌓</button>
+  </div>
+  <h1>Welcome back</h1>
+  <p class="sub">Log in with your college email to ask about Kristu Jayanti University.</p>
+
+  {% with msgs = get_flashed_messages(with_categories=true) %}
+  {% for cat, m in msgs %}<div class="flash {{ cat }}">{{ m }}</div>{% endfor %}
+  {% endwith %}
+
+  <form method="post" novalidate>
+    <input type="hidden" name="csrf" value="{{ csrf_token() }}">
+    <label for="email">College email</label>
+    <input id="email" name="email" type="email" value="{{ email }}" placeholder="example@kristujayanti.com"
+      autocomplete="username" required>
+
+    <div class="label-row">
+      <label for="password">Password</label>
+      <a href="{{ url_for('forgot_password') }}" class="forgot-link">Forgot password?</a>
+    </div>
+    <div class="password-wrap">
+      <input id="password" name="password" type="password" autocomplete="current-password" required>
+      <button type="button" class="toggle-pw" aria-label="Show password" title="Show/Hide password">👁️</button>
+    </div>
+
+    <div class="remember-row">
+      <label class="checkbox-label">
+        <input type="checkbox" name="remember" value="1" checked>
+        <span>Remember me</span>
+      </label>
+    </div>
+
+    <button type="submit">Log in</button>
+  </form>
+  <p class="alt">New here? <a href="{{ url_for('signup') }}">Create an account</a></p>
+</main>
+<script>
+  // Preserve email in forgot-password link
+  const emailInput = document.getElementById('email');
+  const forgotLink = document.querySelector('.forgot-link');
+  if (emailInput && forgotLink) {
+    const baseHref = forgotLink.getAttribute('href');
+    emailInput.addEventListener('input', () => {
+      const val = emailInput.value.trim();
+      forgotLink.href = val ? `${baseHref}?email=${encodeURIComponent(val)}` : baseHref;
+    });
+  }
+
+  // Password visibility toggle
+  document.querySelectorAll('.toggle-pw').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const inp = btn.parentElement.querySelector('input');
+      const isPw = inp.type === 'password';
+      inp.type = isPw ? 'text' : 'password';
+      btn.textContent = isPw ? '🙈' : '👁️';
+      btn.setAttribute('aria-label', isPw ? 'Hide password' : 'Show password');
+    });
+  });
+
+  // Theme switcher
+  const themeBtn = document.getElementById('theme-btn');
+  if (themeBtn) {
+    const updateIcon = () => {
+      const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+      themeBtn.textContent = isDark ? '☀️' : '🌙';
+    };
+    updateIcon();
+    themeBtn.addEventListener('click', () => {
+      const current = document.documentElement.getAttribute('data-theme');
+      const next = current === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', next);
+      localStorage.setItem('ja_theme', next);
+      updateIcon();
+    });
+  }
+</script>
+{% endblock %}

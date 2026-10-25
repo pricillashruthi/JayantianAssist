@@ -1,0 +1,9 @@
+{
+  "name": "jayantianassist",
+  "version": "1.0.0",
+  "description": "Kristu Jayanti University chatbot",
+  "scripts": {
+    "dev": ".venv\\Scripts\\python.exe JayantianAssist-main\\app.py",
+    "start": ".venv\\Scripts\\python.exe JayantianAssist-main\\app.py"
+  }
+}

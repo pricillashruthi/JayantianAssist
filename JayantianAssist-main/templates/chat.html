@@ -1,0 +1,161 @@
+{% extends "base.html" %}
+{% block title %}Chat · JayantianAssist{% endblock %}
+{% block bodyclass %}chatpage{% endblock %}
+{% block body %}
+<header class="topbar">
+  <div class="topbar-left">
+    <span class="brand">JayantianAssist</span>
+    <button type="button" class="profile-chip" id="profile-btn" title="View student profile">
+      <span class="avatar-initial">{{ name[0]|upper if name else 'J' }}</span>
+      <span class="who-text">{{ name }}</span>
+      {% if profile and profile.program %}
+        <span class="badge-prog">{{ profile.program.split('(')[-1].replace(')', '') if '(' in profile.program else profile.program }}</span>
+      {% endif %}
+    </button>
+  </div>
+  
+  <div class="topbar-actions">
+    <button type="button" class="action-btn" id="portal-btn" title="University Portals">🏛️ <span>Portals</span></button>
+    <button type="button" class="action-btn" id="export-btn" title="Export conversation as text file">📥 <span>Export</span></button>
+    <button type="button" class="action-btn" id="clear-btn" title="Clear chat history">🗑️ <span>Clear</span></button>
+    <button type="button" class="theme-toggle" id="theme-btn" title="Toggle dark/light mode" aria-label="Toggle theme">🌓</button>
+    <form method="post" action="{{ url_for('logout') }}" class="logout-form">
+      <input type="hidden" name="csrf" value="{{ csrf_token() }}">
+      <button class="ghost logout-btn" type="submit" title="Log out">Log out</button>
+    </form>
+  </div>
+</header>
+
+<!-- Student Profile Modal -->
+<dialog id="profile-modal" class="modal">
+  <div class="modal-card">
+    <div class="modal-header">
+      <h3>Student Profile</h3>
+      <button type="button" class="close-modal" data-close="profile-modal" aria-label="Close">&times;</button>
+    </div>
+    <div class="profile-info">
+      <div class="profile-avatar">{{ name[0]|upper if name else 'J' }}</div>
+      <div class="profile-details">
+        <h4>{{ name }}</h4>
+        <p class="prof-email">{{ email }}</p>
+      </div>
+    </div>
+    <div class="info-grid">
+      <div class="info-item">
+        <label>Program</label>
+        <span>{{ profile.program if profile else 'Kristu Jayanti College' }}</span>
+      </div>
+      <div class="info-item">
+        <label>Batch</label>
+        <span>{{ profile.batch if profile else 'Jayantian' }}</span>
+      </div>
+      <div class="info-item">
+        <label>Student ID</label>
+        <span>{{ profile.reg_no if profile else 'N/A' }}</span>
+      </div>
+      <div class="info-item">
+        <label>Institution</label>
+        <span>Kristu Jayanti Autonomous</span>
+      </div>
+    </div>
+  </div>
+</dialog>
+
+<!-- Campus Portals Modal -->
+<dialog id="portal-modal" class="modal">
+  <div class="modal-card">
+    <div class="modal-header">
+      <h3>🏛️ Kristu Jayanti University Portals</h3>
+      <button type="button" class="close-modal" data-close="portal-modal" aria-label="Close">&times;</button>
+    </div>
+    <p class="modal-sub">Quick direct access to official university web portals:</p>
+    <div class="portal-grid">
+      <a href="https://kjusys.kristujayanti.edu.in/#/login" target="_blank" rel="noopener noreferrer" class="portal-item">
+        <span class="p-icon">🖥️</span>
+        <div>
+          <strong>KJUsys ERP Login</strong>
+          <small>Attendance, marks, fees & registration</small>
+        </div>
+      </a>
+      <a href="https://kjusys.kristujayanti.edu.in/" target="_blank" rel="noopener noreferrer" class="portal-item">
+        <span class="p-icon">📚</span>
+        <div>
+          <strong>KJLMS E-Learning</strong>
+          <small>Course materials, assignments & quizzes</small>
+        </div>
+      </a>
+      <a href="https://kjusys-qvault.kristujayanti.edu.in/#/" target="_blank" rel="noopener noreferrer" class="portal-item">
+        <span class="p-icon">📝</span>
+        <div>
+          <strong>Qvault Repository</strong>
+          <small>Previous semester question papers</small>
+        </div>
+      </a>
+      <a href="https://kjusys-events.kristujayanti.edu.in/#/" target="_blank" rel="noopener noreferrer" class="portal-item">
+        <span class="p-icon">🎟️</span>
+        <div>
+          <strong>Events Portal</strong>
+          <small>College fests, conferences & registrations</small>
+        </div>
+      </a>
+      <a href="https://mail.google.com/a/kristujayanti.com" target="_blank" rel="noopener noreferrer" class="portal-item">
+        <span class="p-icon">✉️</span>
+        <div>
+          <strong>Student Gmail</strong>
+          <small>Access official @kristujayanti.com inbox</small>
+        </div>
+      </a>
+      <a href="https://www.tcsion.com/SelfServices/" target="_blank" rel="noopener noreferrer" class="portal-item">
+        <span class="p-icon">📊</span>
+        <div>
+          <strong>TCS iON SelfServices</strong>
+          <small>Academic lifecycle & assessments</small>
+        </div>
+      </a>
+      <a href="https://heyzine.com/flip-book/6017d64ab9.html" target="_blank" rel="noopener noreferrer" class="portal-item">
+        <span class="p-icon">📅</span>
+        <div>
+          <strong>Academic Calendar</strong>
+          <small>Term dates, holidays & exam schedule</small>
+        </div>
+      </a>
+      <a href="https://alumni.kristujayanti.edu.in" target="_blank" rel="noopener noreferrer" class="portal-item">
+        <span class="p-icon">🤝</span>
+        <div>
+          <strong>Alumni Network</strong>
+          <small>Mentorship & graduate connect</small>
+        </div>
+      </a>
+    </div>
+  </div>
+</dialog>
+
+<main class="chat">
+  <div id="log" class="log" aria-live="polite">
+    <div class="msg bot intro-msg">
+      Hi <strong>{{ name.split()[0] if name else 'there' }}</strong>! 👋 Ask me anything about Kristu Jayanti University: admissions, fees, courses, placements, hostels, library, exams, and portals.
+    </div>
+  </div>
+
+  <div class="chips" id="chips">
+    <button type="button">What courses are offered?</button>
+    <button type="button">Documents required for admission</button>
+    <button type="button">Placement statistics</button>
+    <button type="button">Library timings</button>
+    <button type="button">Scholarships available</button>
+    <button type="button">Contact details</button>
+  </div>
+
+  <form id="form" class="composer">
+    <button type="button" id="mic-btn" class="mic-btn" title="Speak your question (Voice Input)" aria-label="Voice input">🎙️</button>
+    <input id="input" type="text" placeholder="Ask about Kristu Jayanti (or tap 🎙️ to speak)..." autocomplete="off" maxlength="500" required>
+    <button type="submit" id="send-btn" title="Send question">Send</button>
+  </form>
+</main>
+
+<script>
+  window.CSRF = "{{ csrf_token() }}";
+  window.USER_NAME = "{{ name }}";
+</script>
+<script src="{{ url_for('static', filename='chat.js') }}"></script>
+{% endblock %}
